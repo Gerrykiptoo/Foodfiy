@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Foodfiy/static/css/main.0bcdbb51.css",
+    "main.js": "/Foodfiy/static/js/main.d1134089.js",
+    "static/js/453.8820395a.chunk.js": "/Foodfiy/static/js/453.8820395a.chunk.js",
+    "index.html": "/Foodfiy/index.html",
+    "main.0bcdbb51.css.map": "/Foodfiy/static/css/main.0bcdbb51.css.map",
+    "main.d1134089.js.map": "/Foodfiy/static/js/main.d1134089.js.map",
+    "453.8820395a.chunk.js.map": "/Foodfiy/static/js/453.8820395a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0bcdbb51.css",
+    "static/js/main.d1134089.js"
+  ]
+}
