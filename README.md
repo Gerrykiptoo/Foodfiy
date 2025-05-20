@@ -29,6 +29,7 @@ Ensure you have Node.js and npm installed on your machine.
    cd Foodfiy
 3. Install dependencies:
    npm install
+   npm run build
    ```
 4. Start the development server:
    ```bash
