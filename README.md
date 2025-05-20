@@ -1,6 +1,6 @@
 # Foodfiy
 
-Foodfiy is a web application designed to help users discover and manage their favorite recipes. It offers a seamless and interactive experience for food enthusiasts.
+Foodfiy is a REACT web application designed to help users discover and manage their favorite recipes. It offers a seamless and interactive experience for food enthusiasts.
 
 ## Features
 
