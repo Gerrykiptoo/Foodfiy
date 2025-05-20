@@ -36,4 +36,5 @@ Ensure you have Node.js and npm installed on your machine.
    npm start
 5. Open your browser and visit http://localhost:3000 to access Foodfiy.
 
+6. Delployed version can be found at https://gerrykiptoo.github.io/Foodfiy/
 # Foodfiy
