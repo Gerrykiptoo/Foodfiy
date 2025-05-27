@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import OptimizedImage from "./OptimizedImage";
 import "./ProductCard.css";
 
 const ProductCard = ({ 
@@ -17,7 +17,6 @@ const ProductCard = ({
   onAddToCart 
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
 
   return (
     <div 
@@ -27,19 +26,13 @@ const ProductCard = ({
     >
       <div className="product-card-inner">
         <div className="product-image-container">
-          {imageLoading && (
-            <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}>
-              <Skeleton height="100%" width="100%" />
-            </div>
-          )}
-          <img 
+          <OptimizedImage 
             src={image} 
             className="product-image" 
-            alt={name} 
-            loading="lazy" 
-            style={{ display: imageLoading ? "none" : "block" }}
-            onLoad={() => setImageLoading(false)}
-            onError={() => setImageLoading(false)}
+            alt={name}
+            width={400}
+            quality={85}
+            category={category}
           />
           
           {popular && (

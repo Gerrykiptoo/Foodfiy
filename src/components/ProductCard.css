@@ -180,7 +180,7 @@
 
 .add-to-cart-btn {
   background-color: var(--primary-color);
-  color: white;
+  color: rgb(156, 22, 22);
   border: none;
   padding: 8px 15px;
   border-radius: 20px;

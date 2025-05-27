@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import { fetchProducts, fetchProductsByCategory, searchProducts } from "../services/productService";
+import { preloadImages } from "../services/imageService";
 
 // Fallback menu items in case API fails
 const fallbackMenuItems = [
@@ -173,10 +174,33 @@ const Products = () => {
           // Extract unique categories
           const uniqueCategories = ["All", ...new Set(data.map(item => item.category))];
           setCategories(uniqueCategories);
+          
+          // Preload images in the background with batching
+          const imageUrls = data.map(item => item.image);
+          // First 6 images are likely visible in the viewport
+          const priorityIndices = [0, 1, 2, 3, 4, 5];
+          preloadImages(imageUrls, { 
+            batchSize: 3, 
+            delay: 100,
+            priorityIndices 
+          }).catch(err => {
+            console.warn("Some images failed to preload:", err);
+          });
         } else {
           // Fallback to hardcoded data if API returns empty
           setAllItems(fallbackMenuItems);
           setCategories(["All", ...new Set(fallbackMenuItems.map(item => item.category))]);
+          
+          // Preload fallback images with batching
+          const fallbackImageUrls = fallbackMenuItems.map(item => item.image);
+          const priorityIndices = [0, 1, 2, 3, 4, 5];
+          preloadImages(fallbackImageUrls, { 
+            batchSize: 3, 
+            delay: 100,
+            priorityIndices 
+          }).catch(err => {
+            console.warn("Some fallback images failed to preload:", err);
+          });
         }
       } catch (err) {
         console.error("Error loading products:", err);
@@ -184,6 +208,17 @@ const Products = () => {
         // Use fallback data on error
         setAllItems(fallbackMenuItems);
         setCategories(["All", ...new Set(fallbackMenuItems.map(item => item.category))]);
+        
+        // Preload fallback images with batching
+        const fallbackImageUrls = fallbackMenuItems.map(item => item.image);
+        const priorityIndices = [0, 1, 2, 3, 4, 5];
+        preloadImages(fallbackImageUrls, { 
+          batchSize: 3, 
+          delay: 100,
+          priorityIndices 
+        }).catch(err => {
+          console.warn("Some fallback images failed to preload:", err);
+        });
       } finally {
         setIsLoading(false);
       }
