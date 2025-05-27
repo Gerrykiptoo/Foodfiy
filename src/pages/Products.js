@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 
 // Expanded menu items with categories
 const allMenuItems = [
@@ -293,9 +294,12 @@ const Products = () => {
       
       <div className="container">
         {isLoading ? (
-          <div className="text-center py-5">
-            <div className="loader"></div>
-            <p className="mt-3">Loading menu items...</p>
+          <div className="row">
+            {Array(6).fill().map((_, index) => (
+              <div key={index} className="col-md-6 col-lg-4 mb-4">
+                <ProductCardSkeleton />
+              </div>
+            ))}
           </div>
         ) : menuItems.length === 0 ? (
           <div className="text-center py-5">
