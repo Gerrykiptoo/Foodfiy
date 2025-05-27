@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import { fetchProducts, fetchProductsByCategory, searchProducts } from "../services/productService";
 
-// Expanded menu items with categories
-const allMenuItems = [
+// Fallback menu items in case API fails
+const fallbackMenuItems = [
   {
     id: 1,
     name: "Classic Burger",
@@ -151,58 +152,109 @@ const allMenuItems = [
 ];
 
 const Products = () => {
-  const [menuItems, setMenuItems] = useState(allMenuItems);
+  const [menuItems, setMenuItems] = useState([]);
+  const [allItems, setAllItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [sortOption, setSortOption] = useState("default");
+  const [categories, setCategories] = useState(["All"]);
+  const [error, setError] = useState(null);
 
-  // Get all unique categories
-  const categories = ["All", ...new Set(allMenuItems.map(item => item.category))];
-
-  // Simulate loading
+  // Fetch products from Supabase
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchProducts();
+        if (data && data.length > 0) {
+          setAllItems(data);
+          
+          // Extract unique categories
+          const uniqueCategories = ["All", ...new Set(data.map(item => item.category))];
+          setCategories(uniqueCategories);
+        } else {
+          // Fallback to hardcoded data if API returns empty
+          setAllItems(fallbackMenuItems);
+          setCategories(["All", ...new Set(fallbackMenuItems.map(item => item.category))]);
+        }
+      } catch (err) {
+        console.error("Error loading products:", err);
+        setError("Failed to load products. Using fallback data.");
+        // Use fallback data on error
+        setAllItems(fallbackMenuItems);
+        setCategories(["All", ...new Set(fallbackMenuItems.map(item => item.category))]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
-  // Filter and sort menu items
+  // Filter by category and search term
   useEffect(() => {
-    let filteredItems = [...allMenuItems];
-    
-    // Filter by category
-    if (activeCategory !== "All") {
-      filteredItems = filteredItems.filter(item => item.category === activeCategory);
+    const filterAndSortItems = async () => {
+      setIsLoading(true);
+      try {
+        let filteredItems;
+        
+        // If there's a search term, use the search API
+        if (searchTerm) {
+          try {
+            filteredItems = await searchProducts(searchTerm);
+          } catch (err) {
+            // Fallback to client-side filtering if search API fails
+            filteredItems = allItems.filter(item => 
+              item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+              item.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
+        } 
+        // If category is selected, use category API
+        else if (activeCategory !== "All") {
+          try {
+            filteredItems = await fetchProductsByCategory(activeCategory);
+          } catch (err) {
+            // Fallback to client-side filtering if category API fails
+            filteredItems = allItems.filter(item => item.category === activeCategory);
+          }
+        } 
+        // Otherwise use all items
+        else {
+          filteredItems = [...allItems];
+        }
+        
+        // Sort items
+        switch (sortOption) {
+          case "price-low":
+            filteredItems.sort((a, b) => parseFloat(a.price.substring(1)) - parseFloat(b.price.substring(1)));
+            break;
+          case "price-high":
+            filteredItems.sort((a, b) => parseFloat(b.price.substring(1)) - parseFloat(a.price.substring(1)));
+            break;
+          case "rating":
+            filteredItems.sort((a, b) => b.rating - a.rating);
+            break;
+          default:
+            // Default sorting (by id)
+            filteredItems.sort((a, b) => a.id - b.id);
+        }
+        
+        setMenuItems(filteredItems);
+      } catch (err) {
+        console.error("Error filtering products:", err);
+        setError("Failed to filter products.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Only run if we have items loaded
+    if (allItems.length > 0) {
+      filterAndSortItems();
     }
-    
-    // Filter by search term
-    if (searchTerm) {
-      filteredItems = filteredItems.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Sort items
-    switch (sortOption) {
-      case "price-low":
-        filteredItems.sort((a, b) => parseFloat(a.price.substring(1)) - parseFloat(b.price.substring(1)));
-        break;
-      case "price-high":
-        filteredItems.sort((a, b) => parseFloat(b.price.substring(1)) - parseFloat(a.price.substring(1)));
-        break;
-      case "rating":
-        filteredItems.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        // Default sorting (by id)
-        filteredItems.sort((a, b) => a.id - b.id);
-    }
-    
-    setMenuItems(filteredItems);
-  }, [activeCategory, searchTerm, sortOption]);
+  }, [activeCategory, searchTerm, sortOption, allItems]);
 
   const handleAddToCart = (item) => {
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -293,6 +345,12 @@ const Products = () => {
       </div>
       
       <div className="container">
+        {error && (
+          <div className="alert alert-warning mb-4" role="alert">
+            {error}
+          </div>
+        )}
+        
         {isLoading ? (
           <div className="row">
             {Array(6).fill().map((_, index) => (

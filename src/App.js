@@ -7,6 +7,7 @@ import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
 import ProductDetails from "./pages/ProductDetails";
+import { AuthProvider } from "./context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
@@ -43,26 +44,28 @@ const App = () => {
   };
 
   return (
-    <div className={`app-container ${darkMode ? "dark-mode" : ""}`}>
-      <Header cartCount={cartCount} />
-      <main className="page-transition">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-        </Routes>
-      </main>
-      <Footer />
-      <button 
-        className="theme-toggle" 
-        onClick={toggleDarkMode} 
-        aria-label="Toggle dark mode"
-      >
-        <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
-      </button>
-    </div>
+    <AuthProvider>
+      <div className={`app-container ${darkMode ? "dark-mode" : ""}`}>
+        <Header cartCount={cartCount} />
+        <main className="page-transition">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+          </Routes>
+        </main>
+        <Footer />
+        <button 
+          className="theme-toggle" 
+          onClick={toggleDarkMode} 
+          aria-label="Toggle dark mode"
+        >
+          <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
+        </button>
+      </div>
+    </AuthProvider>
   );
 };
 
